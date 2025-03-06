@@ -68,10 +68,10 @@ npm start
 ### Request & Response Examples
 
 #### Create Todo
+POST /api/todos
 
 **Request:**
 ```json
-POST /api/todos
 {
   "title": "Complete project",
   "description": "Finish the Node.js Todo API project",
