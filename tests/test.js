@@ -5,10 +5,10 @@ const net = require('net');
 
 let serverProcess;
 let testTodoId;
-const SERVER_START_TIMEOUT = 30000; // Increased to 30 seconds
+const SERVER_START_TIMEOUT = 30000; 
 const TEST_TIMEOUT = 10000;
 
-// Function to check if the port is available before starting the server
+
 const isPortAvailable = (port) => {
   return new Promise((resolve, reject) => {
     const server = net.createServer();
@@ -27,18 +27,17 @@ const isPortAvailable = (port) => {
   });
 };
 
-// Handle graceful exit in case of server startup failure
+
 const handleServerStartupFailure = (message) => {
   console.error(`❌ ${message}`);
   console.error('❌ Terminating tests due to server startup failure');
-  // Just throw the error to let Jest handle termination
   throw new Error(`Server startup failed: ${message}`);
 };
 
-// Configure Jest to exit after tests complete
+
 jest.setTimeout(SERVER_START_TIMEOUT);
 
-// Use a global setup to make sure the server is properly stopped before Jest exits
+
 beforeAll(async () => {
   try {
     console.log('🚀 Checking if port 3000 is available...');
@@ -46,11 +45,11 @@ beforeAll(async () => {
     console.log('✅ Port 3000 is available');
 
     console.log('🚀 Running Prisma generate...');
-    // Use synchronous execution for Prisma to prevent hanging processes
+
     try {
       execSync('npx prisma generate', { 
         cwd: path.join(__dirname, '../app'),
-        stdio: 'inherit' // Show output directly
+        stdio: 'inherit'
       });
       console.log('✅ Prisma generate completed');
     } catch (error) {
@@ -58,14 +57,12 @@ beforeAll(async () => {
     }
 
     console.log('🚀 Starting server...');
-    // Use spawn instead of exec for better process control
     serverProcess = require('child_process').spawn('npm', ['run', 'dev'], {
       cwd: path.join(__dirname, '../app'),
       stdio: 'pipe',
-      detached: process.platform !== 'win32' // For non-Windows, use detached for process group
+      detached: process.platform !== 'win32' 
     });
 
-    // Make sure the server process doesn't keep Node.js alive
     if (process.platform !== 'win32') {
       serverProcess.unref();
     }
@@ -84,7 +81,6 @@ beforeAll(async () => {
         if (!started && output.includes('Server is running')) {
           started = true;
           clearTimeout(startTimeout);
-          // Add a small delay to ensure server is fully ready
           setTimeout(resolve, 1000);
         }
       });
@@ -104,17 +100,15 @@ beforeAll(async () => {
     await startupPromise;
     console.log('✅ Server started successfully');
   } catch (error) {
-    // Handle any error during startup process
     handleServerStartupFailure(error.message);
   }
 });
 
-// This will run even if tests fail
+
 afterAll(async () => {
   console.log('🛑 Stopping the server...');
   if (serverProcess) {
     try {
-      // Properly kill the process and all child processes
       if (process.platform === 'win32') {
         execSync(`taskkill /pid ${serverProcess.pid} /T /F`, { stdio: 'ignore' });
       } else {
@@ -130,7 +124,6 @@ afterAll(async () => {
     console.log('✅ Server stopped');
   }
   
-  // Instead of forcing process.exit, allow Jest to naturally complete
   console.log('✅ Tests completed, process will exit naturally');
 }, 5000);
 
