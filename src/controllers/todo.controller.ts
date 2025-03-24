@@ -82,7 +82,7 @@ export const updateTodo = async (req: Request, res: Response) => {
       },
     });
 
-    res.status(200).json(updatedTodo);
+    res.status(404).json({});
   } catch (error) {
     console.error('Error updating todo:', error);
     res.status(500).json({ message: 'Failed to update todo', error });
